@@ -15,9 +15,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.20
       - name: Test Go
@@ -29,7 +29,7 @@ jobs:
     needs: test
     steps:
       - name: Set Check Status Success
-        uses: Sibz/github-status-action@v1.1.1
+        uses: Sibz/github-status-action@v1
         with:
           context: test-status
           authToken: ${{ secrets.GITHUB_TOKEN }}
