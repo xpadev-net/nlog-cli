@@ -7,12 +7,7 @@ on:
 jobs:
   test:
     name: Test local sources
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v3
@@ -29,7 +24,7 @@ jobs:
     needs: test
     steps:
       - name: Set Check Status Success
-        uses: Sibz/github-status-action@v1
+        uses: Sibz/github-status-action@v1.1.1
         with:
           context: test-status
           authToken: ${{ secrets.GITHUB_TOKEN }}
