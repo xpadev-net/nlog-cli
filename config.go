@@ -18,7 +18,7 @@ func isExistConfigFile(path string) bool {
 	}
 
 	for _, e := range entries {
-		if e.Name() == "config.toml" {
+		if e.Name() == "nlog.config.toml" {
 			return true
 		}
 	}
