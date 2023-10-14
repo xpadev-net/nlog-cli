@@ -9,26 +9,25 @@ on:
         required: true
 
 jobs:
-  release:
-    name: Release
+  build_and_release:
+    name: release linux/amd64
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: ["386", amd64, arm64]
+        exclude:
+          - goarch: "386"
+            goos: windows
+          - goarch: "386"
+            goos: darwin
     steps:
-      - name: Checkout Sources
-        uses: actions/checkout@v3
-      - name: Bump-up Semantic Version
-        uses: kyoh86/git-vertag-action@v1.1
+      - uses: actions/checkout@v3
+
+      - uses: wangyoucao577/go-release-action@v1
         with:
-          # method: "major", "minor" or "patch" to update tag with semver
-          method: "${{ github.event.inputs.method }}"
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: "1.20"
-      - name: Test Go
-        run: go test -race ./...
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: release --rm-dist
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          compress_assets: OFF
+          md5sum: FALSE
