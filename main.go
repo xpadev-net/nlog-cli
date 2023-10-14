@@ -29,8 +29,6 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	var command = os.Args[2]
-	fmt.Printf("param -i : %d\n", itemId)
-	fmt.Printf("param -i : %s\n", command)
 	c, err := shellwords.Parse(command)
 	if err != nil {
 		return
@@ -40,6 +38,7 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	cmd := runCmdStr(c)
+	cmd.Dir = workDir
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 
