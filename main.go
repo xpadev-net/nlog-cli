@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	user, err := user.Current()
+	currentUser, err := user.Current()
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -53,7 +53,7 @@ func main() {
 	}
 
 	pid := cmd.Process.Pid
-	taskId, err := createTask(itemId, user.Username, workDir, command, pid)
+	taskId, err := createTask(itemId, currentUser.Username, workDir, command, pid)
 	if err != nil {
 		log.Fatalln(err)
 	}
