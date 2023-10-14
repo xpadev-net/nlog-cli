@@ -4,24 +4,40 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/mattn/go-shellwords"
+	"log"
 	"os"
 	"os/exec"
+	"os/user"
+	"strconv"
 )
 
+var config Config
+
 func main() {
-	getConfig()
+	config = getConfig()
+	workDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 	length := len(os.Args)
 	if length != 3 {
 		println("invalid args")
 		return
 	}
-	var i = os.Args[1]
-	var j = os.Args[2]
-	fmt.Printf("param -i : %s\n", i)
-	fmt.Printf("param -i : %s\n", j)
-	c, err := shellwords.Parse(j)
+	itemId, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	var command = os.Args[2]
+	fmt.Printf("param -i : %s\n", itemId)
+	fmt.Printf("param -i : %s\n", command)
+	c, err := shellwords.Parse(command)
 	if err != nil {
 		return
+	}
+	user, err := user.Current()
+	if err != nil {
+		log.Fatalf(err.Error())
 	}
 	cmd := runCmdStr(c)
 	stdout, _ := cmd.StdoutPipe()
@@ -37,7 +53,10 @@ func main() {
 	}
 
 	pid := cmd.Process.Pid
-	fmt.Printf("param -i : %s\n", pid)
+	taskId, err := createTask(itemId, user.Username, workDir, command, pid)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	go func() {
 		defer close(stdoutCh)
 		scanner := bufio.NewScanner(stdout)
@@ -62,21 +81,32 @@ func main() {
 					return
 				}
 				fmt.Printf("stdout: %s\n", stdoutData)
+				_, err := appendLog(taskId, "out", stdoutData)
+				if err != nil {
+					log.Fatalln(err)
+				}
 
 			case stderrData, ok := <-stderrCh:
 				if !ok {
 					return
 				}
 				fmt.Printf("stderr: %s\n", stderrData)
+				_, err := appendLog(taskId, "err", stderrData)
+				if err != nil {
+					log.Fatalln(err)
+				}
 			}
 		}
 	}()
 	err = cmd.Wait()
 	if err != nil {
-		return
+		log.Fatalln(err)
 	}
-	fmt.Printf("param -i : %s\n", err)
-	println("Hello world!")
+	exitCode := cmd.ProcessState.ExitCode()
+	err = endTask(taskId, exitCode)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func runCmdStr(c []string) *exec.Cmd {

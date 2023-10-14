@@ -28,7 +28,7 @@ func isExistConfigFile(path string) bool {
 func getConfig() Config {
 	configPath := getConfigPath()
 	if configPath == "" {
-		log.Fatal("config.toml not found")
+		log.Fatal("nlog.config.toml not found")
 	}
 
 	var conf Config
@@ -50,7 +50,7 @@ func getConfigPath() string {
 	for i := 0; i < length; i++ {
 		currentPath := strings.Join(part, "/")
 		if isExistConfigFile(currentPath) {
-			return currentPath
+			return currentPath + "/nlog.config.toml"
 		}
 		part = part[:len(part)-1]
 	}
