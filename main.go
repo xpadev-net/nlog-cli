@@ -29,7 +29,7 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 	var command = os.Args[2]
-	fmt.Printf("param -i : %s\n", itemId)
+	fmt.Printf("param -i : %d\n", itemId)
 	fmt.Printf("param -i : %s\n", command)
 	c, err := shellwords.Parse(command)
 	if err != nil {
