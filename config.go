@@ -30,6 +30,7 @@ func getConfig() Config {
 	if configPath == "" {
 		log.Fatal("nlog.config.toml not found")
 	}
+	print(configPath)
 
 	var conf Config
 	_, err := toml.DecodeFile(configPath, &conf)
@@ -49,6 +50,7 @@ func getConfigPath() string {
 	length := len(part)
 	for i := 0; i < length; i++ {
 		currentPath := strings.Join(part, "/")
+		print(currentPath, part)
 		if isExistConfigFile(currentPath) {
 			return currentPath + "/nlog.config.toml"
 		}
