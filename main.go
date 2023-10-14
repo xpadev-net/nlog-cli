@@ -54,7 +54,7 @@ func main() {
 	pid := cmd.Process.Pid
 	taskId, err := createTask(itemId, currentUser.Username, workDir, command, pid)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	go func() {
 		defer close(stdoutCh)
@@ -82,7 +82,7 @@ func main() {
 				fmt.Printf("stdout: %s\n", stdoutData)
 				_, err := appendLog(taskId, "out", stdoutData)
 				if err != nil {
-					log.Fatalln(err)
+					log.Println(err)
 				}
 
 			case stderrData, ok := <-stderrCh:
@@ -92,7 +92,7 @@ func main() {
 				fmt.Printf("stderr: %s\n", stderrData)
 				_, err := appendLog(taskId, "err", stderrData)
 				if err != nil {
-					log.Fatalln(err)
+					log.Println(err)
 				}
 			}
 		}
@@ -104,7 +104,7 @@ func main() {
 	exitCode := cmd.ProcessState.ExitCode()
 	err = endTask(taskId, exitCode)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 }
 

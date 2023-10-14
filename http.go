@@ -9,6 +9,9 @@ import (
 )
 
 func endTask(taskId int, exitCode int) error {
+	if taskId < 0 {
+		return nil
+	}
 	body := EndTaskBody{
 		TaskId:   taskId,
 		ExitCode: exitCode,
@@ -25,6 +28,9 @@ func endTask(taskId int, exitCode int) error {
 }
 
 func appendLog(taskId int, logType string, message string) (int, error) {
+	if taskId < 0 {
+		return -1, nil
+	}
 	body := AppendLogBody{
 		TaskId:  taskId,
 		Type:    logType,
