@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Endpoint string `toml:"endpoint"`
+	Endpoint     string `toml:"endpoint"`
+	GrpcEndpoint string `toml:"grpc_endpoint"`
 }
 
 func isExistConfigFile(path string) bool {

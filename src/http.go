@@ -10,7 +10,7 @@ import (
 )
 
 func getConnection() pb.LoggingServiceClient {
-	address := "localhost:8080"
+	address := config.GrpcEndpoint
 	conn, err := grpc.Dial(
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
