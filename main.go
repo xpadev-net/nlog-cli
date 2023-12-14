@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/mattn/go-shellwords"
-	pb "github.com/xpadev-net/nlog-cli/src/pkg/proto"
+	pb "github.com/xpadev-net/nlog-cli/pkg/proto"
 	"log"
 	"os"
 	"os/exec"

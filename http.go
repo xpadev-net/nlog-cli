@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	pb "github.com/xpadev-net/nlog-cli/src/pkg/proto"
+	pb "github.com/xpadev-net/nlog-cli/pkg/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
