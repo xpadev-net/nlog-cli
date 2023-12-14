@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/mattn/go-shellwords"
+	pb "github.com/xpadev-net/nlog-cli/src/pkg/proto"
 	"log"
 	"os"
 	"os/exec"
@@ -51,8 +52,10 @@ func main() {
 		return
 	}
 
+	conn := getConnection()
+
 	pid := cmd.Process.Pid
-	taskId, err := createTask(itemId, currentUser.Username, workDir, command, pid)
+	taskId, err := createTask(conn, itemId, currentUser.Username, workDir, command, pid)
 	if err != nil {
 		log.Println(err)
 	}
@@ -80,7 +83,7 @@ func main() {
 					return
 				}
 				fmt.Printf("stdout: %s\n", stdoutData)
-				_, err := appendLog(taskId, "out", stdoutData)
+				_, err := appendLog(conn, taskId, pb.Log_stdout, stdoutData)
 				if err != nil {
 					log.Println(err)
 				}
@@ -90,7 +93,7 @@ func main() {
 					return
 				}
 				fmt.Printf("stderr: %s\n", stderrData)
-				_, err := appendLog(taskId, "err", stderrData)
+				_, err := appendLog(conn, taskId, pb.Log_stderr, stderrData)
 				if err != nil {
 					log.Println(err)
 				}
@@ -102,7 +105,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	exitCode := cmd.ProcessState.ExitCode()
-	err = endTask(taskId, exitCode)
+	err = endTask(conn, taskId, exitCode)
 	if err != nil {
 		log.Println(err)
 	}

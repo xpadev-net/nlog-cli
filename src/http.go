@@ -1,122 +1,73 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
+	pb "github.com/xpadev-net/nlog-cli/src/pkg/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"io"
 	"log"
-	mainpb "main/grpc/proto/main"
-	"net/http"
 )
 
-func getConnection() {
+func getConnection() pb.LoggingServiceClient {
 	address := "localhost:8080"
 	conn, err := grpc.Dial(
 		address,
-
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)
 	if err != nil {
 		log.Fatal("Connection failed.")
-		return
+		return nil
 	}
-	defer conn.Close()
-
-	// 3. gRPCクライアントを生成
-	client = hellopb.NewGreetingServiceClient(conn)
+	return pb.NewLoggingServiceClient(conn)
 }
 
-func endTask(taskId int, exitCode int) error {
+func endTask(conn pb.LoggingServiceClient, taskId int, exitCode int) error {
 	if taskId < 0 {
 		return nil
 	}
-	body := EndTaskBody{
-		TaskId:   taskId,
-		ExitCode: exitCode,
+	body := &pb.EndTaskRequest{
+		TaskId:   int64(taskId),
+		ExitCode: int32(exitCode),
 	}
-	jsonData, err := json.Marshal(body)
+	_, err := conn.EndTask(context.Background(), body)
 	if err != nil {
-		return err
-	}
-	_, err = HttpPost(fmt.Sprintf("%s/api/logger/endTask", config.Endpoint), string(jsonData))
-	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
 }
 
-func appendLog(taskId int, logType string, message string) (int, error) {
+func appendLog(conn pb.LoggingServiceClient, taskId int, logType pb.Log_LogType, message string) (int, error) {
 	if taskId < 0 {
 		return -1, nil
 	}
-	body := AppendLogBody{
-		TaskId:  taskId,
-		Type:    logType,
-		Message: message,
+	body := &pb.AppendLogRequest{
+		Log: &pb.Log{
+			TaskId:  int64(taskId),
+			Type:    logType,
+			Message: message,
+		},
 	}
-	jsonData, err := json.Marshal(body)
+	res, err := conn.AppendLog(context.Background(), body)
 	if err != nil {
 		return -1, err
 	}
-	res, err := HttpPost(fmt.Sprintf("%s/api/logger/appendLog", config.Endpoint), string(jsonData))
-	if err != nil {
-		return -1, err
-	}
-	var resObj AppendLogResponse
-	err = json.Unmarshal([]byte(res), &resObj)
-	if err != nil {
-		return -1, err
-	}
-	return resObj.LogId, nil
+	return int(res.LogId), nil
 }
 
-func createTask(itemId int, issuer string, workDir string, command string, pid int) (int, error) {
-	body := CreateTaskBody{
-		ItemId:    itemId,
+func createTask(conn pb.LoggingServiceClient, itemId int, issuer string, workDir string, command string, pid int) (int, error) {
+	body := pb.CreateTaskRequest{
+		ItemId:    int64(itemId),
 		Issuer:    issuer,
 		WorkDir:   workDir,
 		Command:   command,
-		ProcessId: pid,
+		ProcessId: int64(pid),
 	}
-	jsonData, err := json.Marshal(body)
+	res, err := conn.CreateTask(context.Background(), &body)
 	if err != nil {
 		return -1, err
 	}
-	res, err := HttpPost(fmt.Sprintf("%s/api/logger/createTask", config.Endpoint), string(jsonData))
-	if err != nil {
-		return -1, err
-	}
-	var resObj CreateTaskResponse
-	err = json.Unmarshal([]byte(res), &resObj)
-	if err != nil {
-		return -1, err
-	}
-	return resObj.TaskId, nil
-}
-
-func HttpPost(url string, json string) (string, error) {
-
-	req, err := http.NewRequest(
-		"POST",
-		url,
-		bytes.NewBuffer([]byte(json)),
-	)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	b, err := io.ReadAll(resp.Body)
-	return string(b), nil
+	return int(res.TaskId), nil
 }
