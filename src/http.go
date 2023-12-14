@@ -4,9 +4,31 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"io"
+	"log"
+	mainpb "main/grpc/proto/main"
 	"net/http"
 )
+
+func getConnection() {
+	address := "localhost:8080"
+	conn, err := grpc.Dial(
+		address,
+
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		log.Fatal("Connection failed.")
+		return
+	}
+	defer conn.Close()
+
+	// 3. gRPCクライアントを生成
+	client = hellopb.NewGreetingServiceClient(conn)
+}
 
 func endTask(taskId int, exitCode int) error {
 	if taskId < 0 {
