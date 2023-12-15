@@ -71,3 +71,10 @@ func createTask(conn pb.LoggingServiceClient, itemId int, issuer string, workDir
 	}
 	return int(res.TaskId), nil
 }
+
+func ping(conn pb.LoggingServiceClient) {
+	_, err := conn.Ping(context.Background(), &pb.PingRequest{})
+	if err != nil {
+		log.Fatal(err)
+	}
+}

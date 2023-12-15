@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"os/user"
 	"strconv"
+	"time"
 )
 
 var config Config
@@ -100,7 +101,20 @@ func main() {
 			}
 		}
 	}()
+
+	pingTick := time.NewTicker(10 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-pingTick.C:
+				ping(conn)
+			}
+		}
+	}()
+
 	err = cmd.Wait()
+	pingTick.Stop()
+
 	if err != nil {
 		log.Fatalln(err)
 	}
