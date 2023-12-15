@@ -112,7 +112,7 @@ func main() {
 				return
 			case t := <-ticker.C:
 				fmt.Println("info: ping ", t)
-				ping(conn)
+				ping(conn, taskId)
 			}
 		}
 	}()
