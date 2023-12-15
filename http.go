@@ -74,7 +74,8 @@ func createTask(conn pb.LoggingServiceClient, itemId int, issuer string, workDir
 
 func ping(conn pb.LoggingServiceClient) {
 	_, err := conn.Ping(context.Background(), &pb.PingRequest{})
+	log.Println("info: ping")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
