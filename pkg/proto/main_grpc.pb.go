@@ -25,6 +25,7 @@ type LoggingServiceClient interface {
 	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*CreateTaskResponse, error)
 	AppendLog(ctx context.Context, in *AppendLogRequest, opts ...grpc.CallOption) (*AppendLogResponse, error)
 	EndTask(ctx context.Context, in *EndTaskRequest, opts ...grpc.CallOption) (*EndTaskResponse, error)
+	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
 type loggingServiceClient struct {
@@ -62,6 +63,15 @@ func (c *loggingServiceClient) EndTask(ctx context.Context, in *EndTaskRequest, 
 	return out, nil
 }
 
+func (c *loggingServiceClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
+	out := new(PingResponse)
+	err := c.cc.Invoke(ctx, "/LoggingService/Ping", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoggingServiceServer is the server API for LoggingService service.
 // All implementations must embed UnimplementedLoggingServiceServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type LoggingServiceServer interface {
 	CreateTask(context.Context, *CreateTaskRequest) (*CreateTaskResponse, error)
 	AppendLog(context.Context, *AppendLogRequest) (*AppendLogResponse, error)
 	EndTask(context.Context, *EndTaskRequest) (*EndTaskResponse, error)
+	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	mustEmbedUnimplementedLoggingServiceServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedLoggingServiceServer) AppendLog(context.Context, *AppendLogRe
 }
 func (UnimplementedLoggingServiceServer) EndTask(context.Context, *EndTaskRequest) (*EndTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndTask not implemented")
+}
+func (UnimplementedLoggingServiceServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedLoggingServiceServer) mustEmbedUnimplementedLoggingServiceServer() {}
 
@@ -152,6 +166,24 @@ func _LoggingService_EndTask_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoggingService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoggingServiceServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/LoggingService/Ping",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoggingServiceServer).Ping(ctx, req.(*PingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoggingService_ServiceDesc is the grpc.ServiceDesc for LoggingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var LoggingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EndTask",
 			Handler:    _LoggingService_EndTask_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _LoggingService_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
