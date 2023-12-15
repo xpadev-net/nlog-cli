@@ -102,18 +102,24 @@ func main() {
 		}
 	}()
 
-	pingTick := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(10 * time.Second)
+	done := make(chan bool)
+
 	go func() {
 		for {
 			select {
-			case <-pingTick.C:
+			case <-done:
+				return
+			case t := <-ticker.C:
+				fmt.Println("info: ping ", t)
 				ping(conn)
 			}
 		}
 	}()
 
 	err = cmd.Wait()
-	pingTick.Stop()
+	ticker.Stop()
+	done <- true
 
 	if err != nil {
 		log.Fatalln(err)
